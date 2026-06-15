@@ -1,0 +1,70 @@
+name: Zephyr Firmware CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        board:
+          - nrf52840dk_nrf52840
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install west
+
+      - run: |
+          west init zephyrproject
+          cd zephyrproject
+          west update
+          west zephyr-export
+          pip install -r zephyr/scripts/requirements.txt
+
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ninja-build \
+            clang-format \
+            cppcheck \
+            device-tree-compiler
+
+      - run: |
+          mkdir -p zephyrproject/app
+          rsync -a --exclude zephyrproject ./ zephyrproject/app/
+
+      - run: |
+          find zephyrproject/app \
+            \( -name "*.c" -o -name "*.h" \) \
+            -exec clang-format --dry-run --Werror {} +
+
+      - run: |
+          cppcheck \
+            --enable=warning,performance,portability \
+            --error-exitcode=1 \
+            zephyrproject/app
+
+      - run: |
+          cd zephyrproject
+          west build \
+            -b ${{ matrix.board }} \
+            app \
+            --pristine
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware-hex
+          path: zephyrproject/build/zephyr/zephyr.hex
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware-bin
+          path: zephyrproject/build/zephyr/zephyr.bin
