@@ -1,4 +1,4 @@
-# FHR Monitor
+# FHR Monitoring System
 
 - A Zephyr RTOS firmware project for Nordic nRF52840 simulating a wearable fetal heart rate (FHR) monitor.
 - Implements a Standard Battery Service (BAS) and a custom Fetal Heart Rate Service (FHR).
