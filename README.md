@@ -12,13 +12,13 @@ Structure:
     - battery_sim.{c,h} — battery level simulation
     - fhr_sim.{c,h} — fhr value generator
   - tasks/ — RTOS threads
-    - battery_task.{c,h} — decreases battery every 60s and notifies
+    - battery_task.{c,h} — decreases battery
     - fhr_task.{c,h} — generates FHR within a specified range every second and notifies if streaming enabled
 
 BLE Services
 - Device name: FHR_MONITOR
 - Battery Service (UUID 0x180F)
-  - Battery Level (0x2A19): uint8_t, read + notify. Decreases every 60s.
+  - Battery Level (0x2A19): uint8_t, read + notify.
 - FHR Service (custom 128-bit UUIDs from spec)
   - FHR Measurement: uint16_t bpm, notify, generated 140–160 bpm while streaming
   - Streaming Control: uint8_t (0 = stop, 1 = start), read/write
